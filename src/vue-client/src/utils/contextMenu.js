@@ -57,9 +57,16 @@ export const showContextMenu = (x, y, activeEl) => {
 
   // Add the new click handler with current activeEl
   newDeleteOption.addEventListener("click", () => {
-    console.log(activeEl, "activeEl");
+    console.log(activeEl.id, "activeEl");
     if (activeEl) {
       activeEl.remove();
+      const storedItems = JSON.parse(
+        localStorage.getItem("canvasState") || "[]"
+      );
+      const updatedStoredItems = storedItems.filter(
+        (item) => item.id.toString() !== activeEl.id
+      );
+      localStorage.setItem("canvasState", JSON.stringify(updatedStoredItems));
     }
     hideContextMenu();
   });
