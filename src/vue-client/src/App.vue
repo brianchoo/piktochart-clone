@@ -1,135 +1,35 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { showContextMenu } from "@/utils/contextMenu";
+import { makeElementDraggable } from "@/utils/draggableElement";
 import axios from "axios";
 
 // State for file upload
 const selectedFile = ref(null);
 const uploadedImageUrl = ref("");
 const imagesList = ref([]);
+const activeElement = ref(null);
 
-// Keep track of the currently active element
-let activeElement = null;
-
-// Function to handle click on elements (setting active state)
-const handleElementClick = (element) => {
-  // Remove active state from previous element
-  if (activeElement) {
-    activeElement.style.border = "none";
-    activeElement.style.boxShadow = "none";
-  }
-
-  // Set new active element
-  activeElement = element;
-  activeElement.style.border = "2px solid blue";
-  activeElement.style.boxShadow = "0 0 10px rgba(0, 123, 255, 0.5)";
-
-  // Stop event propagation
-  event.stopPropagation();
-};
-
-// Function to handle right-click on elements
-const handleElementRightClick = (event) => {
-  if (activeElement) {
-    event.preventDefault();
-    showContextMenu(event.clientX, event.clientY, activeElement);
-  }
-};
+const randomNumberGenerator = () => Math.floor(Math.random() * 100000);
 
 // Function to handle clicks on the canvas (to deselect elements)
 const handleCanvasClick = () => {
-  if (activeElement) {
-    activeElement.style.border = "none";
-    activeElement.style.boxShadow = "none";
-    activeElement = null;
+  if (activeElement.value) {
+    activeElement.value.style.border = "none";
+    activeElement.value.style.boxShadow = "none";
+    activeElement.value = null;
   }
 };
 
 // Event listener for delete key
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Delete" && activeElement) {
-    activeElement.remove();
-    activeElement = null;
+  if (e.key === "Delete" && activeElement.value) {
+    activeElement.value.remove();
+    activeElement.value = null;
   }
 });
 
-const makeElementDraggable = (element, elementBlock) => {
-  element.style.position = "absolute";
-  element.style.width = "100px";
-  element.style.height = "100px";
-  element.style.margin = "10px";
-  element.style.top = "50%";
-  element.style.left = "50%";
-  element.style.transform = "translate(-50%, -50%)";
-  element.style.cursor = "move"; // Change cursor to indicate draggable
-
-  // Make the image draggable
-  element.setAttribute("draggable", "false"); // Prevent default HTML5 dragging behavior
-
-  // Variables to track dragging
-  let isDragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  // Add click event to set active state
-  element.addEventListener("click", () => handleElementClick(element));
-
-  // Add right-click event for context menu
-  element.addEventListener("contextmenu", handleElementRightClick);
-
-  // Mouse down event - start dragging
-  element.addEventListener("mousedown", (e) => {
-    isDragging = true;
-
-    // Calculate offset from the center of the image
-    const rect = element.getBoundingClientRect();
-    offsetX = e.clientX - (rect.left + rect.width / 2 - 50);
-    offsetY = e.clientY - (rect.top + rect.height / 2 - 50);
-
-    // Bring element to front when dragging starts
-    element.style.zIndex = 1000;
-
-    // Prevent any default behavior
-    e.preventDefault();
-  });
-
-  // Mouse move event - handle dragging
-  document.addEventListener("mousemove", (e) => {
-    if (!isDragging) {
-      element.style.border = "none";
-      return;
-    }
-
-    // Calculate new position relative to the canvas
-    const blockRect = elementBlock.getBoundingClientRect();
-    const newX = e.clientX - blockRect.left - offsetX;
-    const newY = e.clientY - blockRect.top - offsetY;
-
-    // Update position
-    element.style.left = newX + "px";
-    element.style.top = newY + "px";
-    element.style.transform = "none"; // Remove the centering transform
-    element.style.border = "1px solid red";
-
-    e.preventDefault();
-  });
-
-  // Mouse up event - stop dragging
-  document.addEventListener("mouseup", () => {
-    if (isDragging) {
-      isDragging = false;
-      element.style.zIndex = "auto"; // Reset z-index
-    }
-  });
-
-  // Mouse leave - stop dragging if cursor leaves the window
-  document.addEventListener("mouseleave", () => {
-    isDragging = false;
-  });
-};
-
 // random number generator function
-const randomNumber = () => Math.floor(Math.random() * 100000);
 
 const handleClickCurrentElement = (e) => {
   const clickedElement = e.currentTarget;
@@ -184,9 +84,9 @@ const fetchImages = async () => {
 const addImageToCanvas = (imageUrl) => {
   const block = document.querySelector(".block");
   const img = document.createElement("img");
-  img.id = randomNumber();
+  img.id = randomNumberGenerator();
   img.src = imageUrl;
-  makeElementDraggable(img, block);
+  makeElementDraggable(img, block, activeElement);
   block.appendChild(img);
   // Add click handler to the canvas for deselection
   if (!block.hasClickListener) {
@@ -203,8 +103,8 @@ const addTextToCanvas = () => {
   const block = document.querySelector(".block");
   const p = document.createElement("p");
   p.textContent = textInput.value;
-  p.id = randomNumber();
-  makeElementDraggable(p, block);
+  p.id = randomNumberGenerator();
+  makeElementDraggable(p, block, activeElement);
   block.appendChild(p);
   if (!block.hasClickListener) {
     block.addEventListener("click", handleCanvasClick);
