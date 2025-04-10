@@ -132,6 +132,7 @@ const addTextToCanvas = () => {
 // Function to recreate canvas from saved state
 const recreateCanvasFromState = () => {
   const block = document.querySelector(".block");
+  console.log("recreated");
   if (!block) return;
 
   // Clear existing elements
@@ -157,7 +158,19 @@ const recreateCanvasFromState = () => {
       element.style.top = `${item.y}px`;
       element.style.zIndex = item.zIndex;
 
-      makeElementDraggable(element, block, activeElement);
+      const positionLeft = element.style.left;
+      const positionTop = element.style.top;
+
+      console.log(element.style.left);
+      console.log(`${item.x}px`, "`${item.x}px`;");
+
+      makeElementDraggable(
+        element,
+        block,
+        activeElement,
+        positionLeft,
+        positionTop
+      );
       block.appendChild(element);
     }
   });

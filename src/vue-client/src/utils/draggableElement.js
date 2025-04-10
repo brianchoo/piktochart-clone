@@ -25,13 +25,21 @@ const handleElementRightClick = (e, activeElement) => {
   }
 };
 
-export const makeElementDraggable = (element, elementBlock, activeElement) => {
+export const makeElementDraggable = (
+  element,
+  elementBlock,
+  activeElement,
+  positionLeft,
+  positionTop
+) => {
+  let currentX;
+  let currentY;
   element.style.position = "absolute";
   element.style.width = "100px";
   element.style.height = "100px";
   element.style.margin = "10px";
-  element.style.top = "50%";
-  element.style.left = "50%";
+  element.style.left = positionLeft || "50%";
+  element.style.top = positionTop || "50%";
   element.style.transform = "translate(-50%, -50%)";
   element.style.cursor = "move"; // Change cursor to indicate draggable
 
@@ -81,6 +89,8 @@ export const makeElementDraggable = (element, elementBlock, activeElement) => {
     const blockRect = elementBlock.getBoundingClientRect();
     const newX = e.clientX - blockRect.left - offsetX;
     const newY = e.clientY - blockRect.top - offsetY;
+    currentX = newX;
+    currentY = newY;
 
     // Update position
     element.style.left = newX + "px";
@@ -96,6 +106,32 @@ export const makeElementDraggable = (element, elementBlock, activeElement) => {
     if (isDragging) {
       isDragging = false;
       element.style.zIndex = "auto"; // Reset z-index
+
+      const localStorageItems = JSON.parse(
+        localStorage.getItem("canvasState" || [])
+      );
+
+      const updatedItems = localStorageItems.map((item) => {
+        console.log(item, "item");
+        if (item.id.toString() === element.id) {
+          return { ...item, x: currentX, y: currentY };
+        }
+        return item;
+      });
+
+      localStorage.setItem("canvasState", JSON.stringify(updatedItems));
+
+      console.log(element.id, "element id");
+
+      // const storedItems = JSON.parse(
+      //   localStorage.getItem("canvasState") || "[]"
+      // );
+      // const updatedStoredItems = storedItems.filter(
+      //   (item) => item.id.toString() !== activeEl.id
+      // );
+      // localStorage.setItem("canvasState", JSON.stringify(updatedStoredItems));
+
+      console.log(currentX, currentY);
     }
   });
 
