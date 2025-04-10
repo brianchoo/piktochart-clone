@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { randomNumberGenerator } from "@/helpers/randomNumberGenerator";
 import { showContextMenu } from "@/utils/contextMenu";
 import { makeElementDraggable } from "@/utils/draggableElement";
+import { uploadImageToServer, fetchUploadedImages } from "@/services/api";
 import axios from "axios";
 
 // State for file upload
@@ -9,8 +11,12 @@ const selectedFile = ref(null);
 const uploadedImageUrl = ref("");
 const imagesList = ref([]);
 const activeElement = ref(null);
+const canvasItems = ref([]);
 
-const randomNumberGenerator = () => Math.floor(Math.random() * 100000);
+// Function to save canvas state to localStorage
+const saveCanvasState = () => {
+  localStorage.setItem("canvasState", JSON.stringify(canvasItems.value));
+};
 
 // Function to handle clicks on the canvas (to deselect elements)
 const handleCanvasClick = () => {
@@ -24,19 +30,16 @@ const handleCanvasClick = () => {
 // Event listener for delete key
 document.addEventListener("keydown", (e) => {
   if (e.key === "Delete" && activeElement.value) {
+    const itemId = activeElement.value.id;
+    // Remove from state
+    canvasItems.value = canvasItems.value.filter(
+      (item) => item.id.toString() !== itemId
+    );
     activeElement.value.remove();
     activeElement.value = null;
+    saveCanvasState();
   }
 });
-
-// random number generator function
-
-const handleClickCurrentElement = (e) => {
-  const clickedElement = e.currentTarget;
-  clickedElement.style.width = "400px";
-  console.log(clickedElement, "clickedElement");
-  alert("You clicked:", clickedElement);
-};
 
 // For handling file selection
 const handleFileSelect = (event) => {
@@ -44,37 +47,23 @@ const handleFileSelect = (event) => {
   console.log(selectedFile.value);
 };
 
-// Upload image to the server
+// Upload image
 const uploadImage = async () => {
-  if (!selectedFile.value) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("upload", selectedFile.value);
+  if (!selectedFile.value) return;
 
   try {
-    const response = await axios.post(
-      "http://localhost:8000/uploads",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    uploadedImageUrl.value = response.data.file;
-    fetchImages(); // Retrieve image after upload
+    const fileUrl = await uploadImageToServer(selectedFile.value);
+    uploadedImageUrl.value = fileUrl;
+    await fetchImages(); // Refresh image list
   } catch (error) {
     console.error("Error uploading image:", error);
   }
 };
 
-// Fetch all images
+// Fetch image list
 const fetchImages = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/images");
-    imagesList.value = response.data;
+    imagesList.value = await fetchUploadedImages();
   } catch (error) {
     console.error("Error fetching images:", error);
   }
@@ -82,12 +71,26 @@ const fetchImages = async () => {
 
 // Add an image to the canvas
 const addImageToCanvas = (imageUrl) => {
+  const imageId = randomNumberGenerator();
+  // Add to state array
+  canvasItems.value.push({
+    type: "image",
+    id: imageId,
+    src: imageUrl,
+    x: 0, // Initial position
+    y: 0,
+    zIndex: canvasItems.value.length, // For layering
+  });
+
   const block = document.querySelector(".block");
   const img = document.createElement("img");
-  img.id = randomNumberGenerator();
+  img.id = imageId;
   img.src = imageUrl;
   makeElementDraggable(img, block, activeElement);
   block.appendChild(img);
+  // Save state
+  saveCanvasState();
+
   // Add click handler to the canvas for deselection
   if (!block.hasClickListener) {
     block.addEventListener("click", handleCanvasClick);
@@ -100,12 +103,25 @@ const addTextToCanvas = () => {
   const textInput = document.getElementById("addTextInput");
   if (!textInput.value) return;
 
+  const textId = randomNumberGenerator();
+
+  // Add to state
+  canvasItems.value.push({
+    type: "text",
+    id: textId,
+    content: textInput.value,
+    x: 0, // Initial position
+    y: 0,
+    zIndex: canvasItems.value.length,
+  });
+
   const block = document.querySelector(".block");
   const p = document.createElement("p");
   p.textContent = textInput.value;
-  p.id = randomNumberGenerator();
+  p.id = textId;
   makeElementDraggable(p, block, activeElement);
   block.appendChild(p);
+  saveCanvasState();
   if (!block.hasClickListener) {
     block.addEventListener("click", handleCanvasClick);
     block.hasClickListener = true;
@@ -113,9 +129,59 @@ const addTextToCanvas = () => {
   textInput.value = "";
 };
 
+// Function to recreate canvas from saved state
+const recreateCanvasFromState = () => {
+  const block = document.querySelector(".block");
+  if (!block) return;
+
+  // Clear existing elements
+  block.innerHTML = "";
+
+  // Recreate each element from state
+  canvasItems.value.forEach((item) => {
+    let element;
+
+    if (item.type === "image") {
+      element = document.createElement("img");
+      element.src = item.src;
+    } else if (item.type === "text") {
+      element = document.createElement("p");
+      element.textContent = item.content;
+    }
+
+    if (element) {
+      element.id = item.id;
+      element.dataset.type = item.type;
+      element.style.position = "absolute";
+      element.style.left = `${item.x}px`;
+      element.style.top = `${item.y}px`;
+      element.style.zIndex = item.zIndex;
+
+      makeElementDraggable(element, block, activeElement);
+      block.appendChild(element);
+    }
+  });
+
+  // Add click handler to the canvas for deselection
+  if (!block.hasClickListener) {
+    block.addEventListener("click", handleCanvasClick);
+    block.hasClickListener = true;
+  }
+};
+
 // Initialize
 onMounted(() => {
   fetchImages(); // Load existing images
+
+  const savedState = localStorage.getItem("canvasState");
+  if (savedState) {
+    try {
+      canvasItems.value = JSON.parse(savedState);
+      recreateCanvasFromState();
+    } catch (e) {
+      console.error("Error loading saved state:", e);
+    }
+  }
 });
 </script>
 

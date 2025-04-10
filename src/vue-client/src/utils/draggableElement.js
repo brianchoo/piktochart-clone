@@ -10,8 +10,8 @@ const handleElementClick = (element, e, activeElement) => {
 
   // Set new active element
   activeElement.value = element;
-  activeElement.value.style.border = "2px solid blue";
-  activeElement.value.style.boxShadow = "0 0 10px rgba(0, 123, 255, 0.5)";
+  activeElement.value.style.border = "4px solid blue";
+  activeElement.value.style.boxShadow = "0 0 10px rgba(0, 123, 255, 0.8)";
 
   // Stop event propagation
   e.stopPropagation();
@@ -19,7 +19,6 @@ const handleElementClick = (element, e, activeElement) => {
 
 // Function to handle right-click on elements
 const handleElementRightClick = (e, activeElement) => {
-  console.log(activeElement, "active element");
   if (activeElement.value) {
     e.preventDefault();
     showContextMenu(e.clientX, e.clientY, activeElement.value);

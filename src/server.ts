@@ -47,9 +47,6 @@ const uploadMiddleware = multer({ storage, fileFilter }).single("upload");
 server
   // .use(express.static("./"))
   // .use(express.static(path.join(__dirname, "client")))
-  .get("/api/hello", (req, res) => {
-    res.json({ message: "Hello World from API!" });
-  })
   .post("/uploads", (req, res) => {
     uploadMiddleware(req, res, (err) => {
       if (err || !req.file) {
