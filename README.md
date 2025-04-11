@@ -1,4 +1,4 @@
-# Piktochart Cline
+# Piktochart Clone
 
 A web application for creating and editing canvas designs with text and images.
 
