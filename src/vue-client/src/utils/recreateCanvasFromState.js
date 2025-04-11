@@ -5,7 +5,6 @@ const recreateCanvasFromState = (
   handleCanvasClick
 ) => {
   const block = document.querySelector(".block");
-  console.log("recreated");
   if (!block) return;
 
   // Clear existing elements
@@ -33,9 +32,6 @@ const recreateCanvasFromState = (
 
       const positionLeft = element.style.left;
       const positionTop = element.style.top;
-
-      console.log(element.style.left);
-      console.log(`${item.x}px`, "`${item.x}px`;");
 
       makeElementDraggable(
         element,

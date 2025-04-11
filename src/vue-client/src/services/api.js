@@ -3,21 +3,29 @@ import axios from "axios";
 const API_URL = "http://localhost:8000";
 
 const uploadImageToServer = async (file) => {
-  const formData = new FormData();
-  formData.append("upload", file);
+  try {
+    const formData = new FormData();
+    formData.append("upload", file);
 
-  const response = await axios.post(`${API_URL}/uploads`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    const response = await axios.post(`${API_URL}/uploads`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-  return response.data.file;
+    return response.data.file;
+  } catch (error) {
+    console.error("Error in uploadImageToServer:", error);
+  }
 };
 
 const fetchUploadedImages = async () => {
-  const response = await axios.get(`${API_URL}/images`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/images`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in fetchUploadedImages:", error);
+  }
 };
 
 export { uploadImageToServer, fetchUploadedImages };

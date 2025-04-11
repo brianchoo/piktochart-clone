@@ -58,7 +58,6 @@ const makeElementDraggable = (
 
   // Add right-click event for context menu
   element.addEventListener("contextmenu", (e) => {
-    console.log("it fires here");
     handleElementRightClick(e, activeElement);
   });
 
@@ -112,7 +111,6 @@ const makeElementDraggable = (
       );
 
       const updatedItems = localStorageItems.map((item) => {
-        console.log(item, "item");
         if (item.id.toString() === element.id) {
           return { ...item, x: currentX, y: currentY };
         }
