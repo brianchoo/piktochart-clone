@@ -6,6 +6,7 @@ import cors from "cors";
 import path from "path";
 
 const server = express();
+const PORT = 8000;
 
 // Enable CORS
 server.use(
@@ -77,6 +78,6 @@ server
   // .get("/", (req, res) => {
   //   res.sendFile(path.join(__dirname, "client/index.html"));
   // })
-  .listen(8000, () => {
-    console.log("Server started. listening to 8000");
+  .listen(PORT, () => {
+    console.log(`Server started. listening to ${PORT}`);
   });
