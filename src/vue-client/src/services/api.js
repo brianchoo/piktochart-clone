@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8000";
 
-export const uploadImageToServer = async (file) => {
+const uploadImageToServer = async (file) => {
   const formData = new FormData();
   formData.append("upload", file);
 
@@ -15,7 +15,9 @@ export const uploadImageToServer = async (file) => {
   return response.data.file;
 };
 
-export const fetchUploadedImages = async () => {
+const fetchUploadedImages = async () => {
   const response = await axios.get(`${API_URL}/images`);
   return response.data;
 };
+
+export { uploadImageToServer, fetchUploadedImages };

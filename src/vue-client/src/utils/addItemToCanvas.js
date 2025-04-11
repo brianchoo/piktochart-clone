@@ -88,9 +88,4 @@ const addTextToCanvas = (canvasItems, activeElement) => {
 };
 
 // Export all functions
-export {
-  addItemToCanvas,
-  addImageToCanvas,
-  addTextToCanvas,
-  randomNumberGenerator,
-};
+export { addImageToCanvas, addTextToCanvas };

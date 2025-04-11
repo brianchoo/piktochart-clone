@@ -25,7 +25,7 @@ const handleElementRightClick = (e, activeElement) => {
   }
 };
 
-export const makeElementDraggable = (
+const makeElementDraggable = (
   element,
   elementBlock,
   activeElement,
@@ -95,7 +95,7 @@ export const makeElementDraggable = (
     // Update position
     element.style.left = newX + "px";
     element.style.top = newY + "px";
-    element.style.transform = "none"; // Remove the centering transform
+    element.style.transform = "none";
     element.style.border = "1px solid red";
 
     e.preventDefault();
@@ -120,18 +120,6 @@ export const makeElementDraggable = (
       });
 
       localStorage.setItem("canvasState", JSON.stringify(updatedItems));
-
-      console.log(element.id, "element id");
-
-      // const storedItems = JSON.parse(
-      //   localStorage.getItem("canvasState") || "[]"
-      // );
-      // const updatedStoredItems = storedItems.filter(
-      //   (item) => item.id.toString() !== activeEl.id
-      // );
-      // localStorage.setItem("canvasState", JSON.stringify(updatedStoredItems));
-
-      console.log(currentX, currentY);
     }
   });
 
@@ -140,3 +128,5 @@ export const makeElementDraggable = (
     isDragging = false;
   });
 };
+
+export { makeElementDraggable };

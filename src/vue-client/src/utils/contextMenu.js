@@ -42,7 +42,7 @@ const hideContextMenu = () => {
 };
 
 // Function to show context menu
-export const showContextMenu = (x, y, activeEl) => {
+const showContextMenu = (x, y, activeEl) => {
   const menu = createContextMenu();
   menu.style.display = "block";
   menu.style.left = `${x}px`;
@@ -76,3 +76,5 @@ export const showContextMenu = (x, y, activeEl) => {
     window.addEventListener("click", hideContextMenu, { once: true });
   }, 0);
 };
+
+export { showContextMenu };

@@ -53,7 +53,7 @@ const uploadImage = async () => {
     uploadedImageUrl.value = fileUrl;
     await fetchImages(); // Refresh image list
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Error in uploadImage:", error);
   }
 };
 
@@ -62,7 +62,7 @@ const fetchImages = async () => {
   try {
     imagesList.value = await fetchUploadedImages();
   } catch (error) {
-    console.error("Error fetching images:", error);
+    console.error("Error in fetchImages:", error);
   }
 };
 
