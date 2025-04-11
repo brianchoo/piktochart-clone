@@ -6,6 +6,7 @@ import { makeElementDraggable } from "@/utils/draggableElement";
 import { addTextToCanvas, addImageToCanvas } from "@/utils/addItemToCanvas";
 import { saveCanvasState } from "@/utils/saveCanvasState";
 import { recreateCanvasFromState } from "@/utils/recreateCanvasFromState";
+import { handleCanvasClick, handleKeyDown } from "@/utils/handleCanvas";
 import { uploadImageToServer, fetchUploadedImages } from "@/services/api";
 import axios from "axios";
 
@@ -16,32 +17,17 @@ const imagesList = ref([]);
 const activeElement = ref(null);
 const canvasItems = ref([]);
 
-// Function to handle clicks on the canvas (to deselect elements)
-const handleCanvasClick = () => {
-  if (activeElement.value) {
-    activeElement.value.style.border = "none";
-    activeElement.value.style.boxShadow = "none";
-    activeElement.value = null;
-  }
-};
-
-// Handle keydown events for deleting elements
-const handleKeyDown = (e) => {
-  if (e.key === "Delete" && activeElement.value) {
-    const itemId = activeElement.value.id;
-    // Remove from state
-    canvasItems.value = canvasItems.value.filter(
-      (item) => item.id.toString() !== itemId
-    );
-    activeElement.value.remove();
-    activeElement.value = null;
-    saveCanvasState(canvasItems);
-  }
-};
-
 // For handling file selection
 const handleFileSelect = (event) => {
   selectedFile.value = event.target.files[0];
+};
+
+const handleAddImage = (imageUrl) => {
+  addImageToCanvas(imageUrl, canvasItems, activeElement);
+};
+
+const handleAddText = () => {
+  addTextToCanvas(canvasItems, activeElement);
 };
 
 // Upload image
@@ -51,6 +37,7 @@ const uploadImage = async () => {
   try {
     const fileUrl = await uploadImageToServer(selectedFile.value);
     uploadedImageUrl.value = fileUrl;
+    selectedFile.value = null;
     await fetchImages(); // Refresh image list
   } catch (error) {
     console.error("Error in uploadImage:", error);
@@ -66,18 +53,12 @@ const fetchImages = async () => {
   }
 };
 
-const handleAddImage = (imageUrl) => {
-  addImageToCanvas(imageUrl, canvasItems, activeElement);
-};
-
-const handleAddText = () => {
-  addTextToCanvas(canvasItems, activeElement);
-};
-
 onMounted(() => {
   fetchImages(); // Load existing images
 
-  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keydown", (e) =>
+    handleKeyDown(e, activeElement, canvasItems)
+  );
 
   const savedState = localStorage.getItem("canvasState");
   if (savedState) {
@@ -87,7 +68,7 @@ onMounted(() => {
         canvasItems,
         activeElement,
         makeElementDraggable,
-        handleCanvasClick
+        handleCanvasClick(activeElement)
       );
     } catch (e) {
       console.error("Error loading saved state:", e);
@@ -103,7 +84,6 @@ onMounted(() => {
         <div class="form mt-5">
           <h3>Form</h3>
           <hr />
-          <!-- <div class="input-group"> -->
           <div class="custom-file">
             <input
               id="upload-image-input"
@@ -127,7 +107,6 @@ onMounted(() => {
               Upload
             </button>
           </div>
-          <!-- </div> -->
           <!-- Upload Form here -->
         </div>
         <div class="assets w-100 mt-5">
