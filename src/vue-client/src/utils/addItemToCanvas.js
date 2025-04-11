@@ -1,11 +1,6 @@
 import { randomNumberGenerator } from "@/helpers/randomNumberGenerator";
 import { makeElementDraggable } from "@/utils/draggableElement";
-
-const saveCanvasState = (canvasItems) => {
-  if (canvasItems) {
-    localStorage.setItem("canvasState", JSON.stringify(canvasItems.value));
-  }
-};
+import { saveCanvasState } from "@/utils/saveCanvasState";
 
 const addItemToCanvas = (itemConfig, canvasItems, activeElement) => {
   const { type, id, element, properties } = itemConfig;
@@ -17,7 +12,7 @@ const addItemToCanvas = (itemConfig, canvasItems, activeElement) => {
     ...properties,
     x: 0, // Initial position
     y: 0,
-    zIndex: canvasItems.value.length, // For layering
+    zIndex: canvasItems.value.length,
   });
 
   const block = document.querySelector(".block");

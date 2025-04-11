@@ -4,6 +4,7 @@ import { randomNumberGenerator } from "@/helpers/randomNumberGenerator";
 import { showContextMenu } from "@/utils/contextMenu";
 import { makeElementDraggable } from "@/utils/draggableElement";
 import { addTextToCanvas, addImageToCanvas } from "@/utils/addItemToCanvas";
+import { saveCanvasState } from "@/utils/saveCanvasState";
 import { uploadImageToServer, fetchUploadedImages } from "@/services/api";
 import axios from "axios";
 
@@ -13,11 +14,6 @@ const uploadedImageUrl = ref("");
 const imagesList = ref([]);
 const activeElement = ref(null);
 const canvasItems = ref([]);
-
-// Function to save canvas state to localStorage
-const saveCanvasState = () => {
-  localStorage.setItem("canvasState", JSON.stringify(canvasItems.value));
-};
 
 // Function to handle clicks on the canvas (to deselect elements)
 const handleCanvasClick = () => {
@@ -38,7 +34,7 @@ const handleKeyDown = (e) => {
     );
     activeElement.value.remove();
     activeElement.value = null;
-    saveCanvasState();
+    saveCanvasState(canvasItems);
   }
 };
 
@@ -46,44 +42,6 @@ const handleKeyDown = (e) => {
 const handleFileSelect = (event) => {
   selectedFile.value = event.target.files[0];
 };
-
-// // Generic function to add items to the canvas
-// const addItemToCanvas = (itemConfig) => {
-//   const { type, id, element, properties } = itemConfig;
-
-//   // Add to state array
-//   canvasItems.value.push({
-//     type,
-//     id,
-//     ...properties,
-//     x: 0, // Initial position
-//     y: 0,
-//     zIndex: canvasItems.value.length, // For layering
-//   });
-
-//   const block = document.querySelector(".block");
-
-//   // Apply any custom styling or attributes
-//   if (itemConfig.customizeElement) {
-//     itemConfig.customizeElement(element);
-//   }
-
-//   // Set element ID and make draggable
-//   element.id = id;
-//   makeElementDraggable(element, block, activeElement);
-//   block.appendChild(element);
-
-//   // Save state
-//   saveCanvasState();
-
-//   // Add click handler to the canvas for deselection (once)
-//   if (!block.hasClickListener) {
-//     block.addEventListener("click", handleCanvasClick);
-//     block.hasClickListener = true;
-//   }
-
-//   return element;
-// };
 
 // Upload image
 const uploadImage = async () => {
@@ -114,66 +72,6 @@ const handleAddImage = (imageUrl) => {
 const handleAddText = () => {
   addTextToCanvas(canvasItems, activeElement);
 };
-
-// // Add an image to the canvas
-// const addImageToCanvas = (imageUrl) => {
-//   const imageId = randomNumberGenerator();
-//   // Add to state array
-//   canvasItems.value.push({
-//     type: "image",
-//     id: imageId,
-//     src: imageUrl,
-//     x: 0, // Initial position
-//     y: 0,
-//     zIndex: canvasItems.value.length, // For layering
-//   });
-
-//   const block = document.querySelector(".block");
-//   const img = document.createElement("img");
-//   img.id = imageId;
-//   img.src = imageUrl;
-//   makeElementDraggable(img, block, activeElement);
-//   block.appendChild(img);
-//   // Save state
-//   saveCanvasState();
-
-//   // Add click handler to the canvas for deselection
-//   if (!block.hasClickListener) {
-//     block.addEventListener("click", handleCanvasClick);
-//     block.hasClickListener = true;
-//   }
-// };
-
-// // Add text to the canvas
-// const addTextToCanvas = () => {
-//   const textInput = document.getElementById("addTextInput");
-//   if (!textInput.value) return;
-
-//   const textId = randomNumberGenerator();
-
-//   // Add to state
-//   canvasItems.value.push({
-//     type: "text",
-//     id: textId,
-//     content: textInput.value,
-//     x: 0, // Initial position
-//     y: 0,
-//     zIndex: canvasItems.value.length,
-//   });
-
-//   const block = document.querySelector(".block");
-//   const p = document.createElement("p");
-//   p.textContent = textInput.value;
-//   p.id = textId;
-//   makeElementDraggable(p, block, activeElement);
-//   block.appendChild(p);
-//   saveCanvasState();
-//   if (!block.hasClickListener) {
-//     block.addEventListener("click", handleCanvasClick);
-//     block.hasClickListener = true;
-//   }
-//   textInput.value = "";
-// };
 
 // Function to recreate canvas from saved state
 const recreateCanvasFromState = () => {
